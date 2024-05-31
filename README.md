@@ -15,4 +15,10 @@ Very simple cloth simulation using Verlet position based physics.
 
 # Compilation
 
-Instructions can be found [here](https://github.com/johnBuffer/AntSimulator#compilation), steps are similar.
+```bash
+mkdir build
+cd build
+cmake ..
+make
+./Cloth
+```
