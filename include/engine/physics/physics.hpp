@@ -26,6 +26,7 @@ struct PhysicSolver
         for (uint32_t i(sub_steps); i--;) {
             applyGravity();
             applyAirFriction();
+            updateClothCollisions(sub_step_dt);
             updatePositions(sub_step_dt);
             solveConstraints();
             updateDerivatives(sub_step_dt);
@@ -70,6 +71,76 @@ struct PhysicSolver
         }
     }
 
+    void updateClothCollisions(float dt)
+    {   
+        float k = 10.0f;
+        dt = dt;
+        std::vector<Particle> p1, p2;
+        for (Particle& p : objects) {
+            if (p.cloth_ID == 1) {
+                p1.push_back(p);
+            } else if (p.cloth_ID == 2) {
+                p2.push_back(p);
+            }
+        }
+        // for(auto iter=p1.begin(); iter!=p1.end(); ++iter){
+        //     printf("p1: %f %f\n", iter->position.x, iter->position.y);
+        //     printf("ID: %d\n", iter->cloth_ID);
+        // }
+        // for(auto iter=p2.begin(); iter!=p2.end(); ++iter){
+        //     printf("p1: %f %f\n", iter->position.x, iter->position.y);
+        //     printf("ID: %d\n", iter->cloth_ID);
+        // }
+        for(auto iter=p1.begin(); iter!=p1.end(); ++iter){
+            int num = 0;
+            for(auto iter2=p2.begin(); iter2!=p2.end(); ++iter2){
+                // float distance = sqrt(pow(iter->position.x - iter2->position.x, 2) + pow(iter->position.y - iter2->position.y, 2));
+                if (fabs(iter->position.y - iter2->position.y) < 20.0f && iter->position.x > iter2->position.x){
+                    num++;
+                }
+            }
+            //printf("num: %d\n", num);
+            if (num > 0){
+                // printf("num: %d\n", num);
+                // printf("old x v: %f\n", iter->velocity.x);
+                iter->velocity.x -= k * num;
+                // printf("new x v: %f\n", iter->velocity.x);
+            }
+        }
+
+        for(auto iter=p2.begin(); iter!=p2.end(); ++iter){
+            int num = 0;
+            for(auto iter2=p1.begin(); iter2!=p1.end(); ++iter2){
+                // float distance = sqrt(pow(iter->position.x - iter2->position.x, 2) + pow(iter->position.y - iter2->position.y, 2));
+                if (fabs(iter->position.y - iter2->position.y) < 20.0f && iter->position.x < iter2->position.x){
+                    num++;
+                }
+            }
+            //printf("num: %d\n", num);
+            if (num > 0){
+                // printf("num: %d\n", num);
+                // printf("old x v: %f\n", iter->velocity.x);
+                iter->velocity.x += k * num;
+                // printf("new x v: %f\n", iter->velocity.x);
+            }
+        }
+        //update the velocity in the object
+        for (auto iter=p1.begin(); iter!=p1.end(); ++iter){
+            for (Particle& p : objects) {
+                if (p.id == iter->id){
+                    p.velocity = iter->velocity;
+                }
+            }
+        }
+        for (auto iter=p2.begin(); iter!=p2.end(); ++iter){
+            for (Particle& p : objects) {
+                if (p.id == iter->id){
+                    p.velocity = iter->velocity;
+                }
+            }
+        }
+    }
+
     void solveConstraints()
     {
         for (uint32_t i(solver_iterations); i--;) {
@@ -84,10 +155,11 @@ struct PhysicSolver
         constraints.remove_if([](const LinkConstraint& c) {return !c.isValid();});
     }
 
-    civ::ID addParticle(sf::Vector2f position)
+    civ::ID addParticle(sf::Vector2f position, int cloth_ID = -1)
     {
         const civ::ID particle_id = objects.emplace_back(position);
         objects[particle_id].id = particle_id;
+        objects[particle_id].cloth_ID = cloth_ID;
         return particle_id;
     }
 

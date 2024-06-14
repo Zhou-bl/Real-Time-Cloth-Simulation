@@ -8,6 +8,7 @@ struct Particle
     civ::ID      id            = 0;
     float        mass          = 1.0f;
     bool         moving        = true;
+    int cloth_ID = -1;
     sf::Vector2f position;
     sf::Vector2f position_old;
     sf::Vector2f velocity;

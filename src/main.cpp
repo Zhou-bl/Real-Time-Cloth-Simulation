@@ -7,7 +7,7 @@
 
 const bool TRIANGULAR=0;
 
-std::vector<Particle> add_cloth(uint32_t cloth_width, uint32_t cloth_height, float links_length, float start_x, float start_y, PhysicSolver& solver) {
+std::vector<Particle> add_cloth(uint32_t cloth_width, uint32_t cloth_height, float links_length, float start_x, float start_y, PhysicSolver& solver, int cloth_ID) {
     std::vector<Particle> cloth_particles;
     cloth_particles.clear();
 
@@ -17,7 +17,7 @@ std::vector<Particle> add_cloth(uint32_t cloth_width, uint32_t cloth_height, flo
         const float max_elongation = 1.2f * (2.0f - to<float>(y) / float(cloth_height));
         for (uint32_t x(0); x < cloth_width; ++x) {
             const civ::ID id = solver.addParticle(
-                sf::Vector2f(start_x + to<float>(x) * links_length, start_y + to<float>(y) * links_length)
+                sf::Vector2f(start_x + to<float>(x) * links_length, start_y + to<float>(y) * links_length), cloth_ID
             );
             cloth_particles.push_back(solver.objects[id]);
 
@@ -36,11 +36,11 @@ std::vector<Particle> add_cloth(uint32_t cloth_width, uint32_t cloth_height, flo
             // 扭曲性弹簧
             // Add top-left link if there is a particle on the top-left
             if (x > 0 && y > 0) {
-                solver.addLink(id-cloth_width-1, id, max_elongation, 0.3f);
+                solver.addLink(id-cloth_width-1, id, max_elongation, 0.5f);
             }
             // Add top-right link if there is a particle on the top-right
             if (x < cloth_width - 1 && y > 0) {
-                solver.addLink(id-cloth_width+1, id, max_elongation, 0.3f);
+                solver.addLink(id-cloth_width+1, id, max_elongation, 0.5f);
             }
 
             // 拉伸性弹簧
@@ -105,8 +105,8 @@ int main()
     }
     } else {
         // 正方形化
-        std::vector<Particle> cloth_particles_1 = add_cloth(25, 25, 20.0f, (window_width - (25 - 1) * 20.0f) * 0.5f, 0.0f, solver),
-                            cloth_particles_2 = add_cloth(25, 25, 20.0f, (window_width - (75 - 1) * 20.0f) * 0.5f, 0.0f, solver);
+        std::vector<Particle> cloth_particles_1 = add_cloth(25, 25, 20.0f, (window_width - (25 - 1) * 20.0f) * 0.5f, 0.0f, solver, 2),
+                            cloth_particles_2 = add_cloth(25, 25, 20.0f, (window_width - (75 - 1) * 20.0f) * 0.5f, 0.0f, solver, 1);
 
         //Add two special particles at the right side of the cloth at x1,x2 = 1760; y1, y2 = 0, 1000
         const civ::ID id1 = solver.addParticle(sf::Vector2f(1860.0f, 0.0f));
@@ -147,7 +147,7 @@ int main()
         );
 
         // Main loop
-        const float dt = 1.0f / 60.0f;
+        const float dt = 1.0f / 40.0f;
         while (app.run()) {
             // Get the mouse coord in the world space, to allow proper control even with modified viewport
             const sf::Vector2f mouse_position = app.getWorldMousePosition();
