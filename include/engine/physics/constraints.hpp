@@ -51,7 +51,7 @@ struct LinkConstraint
             //broken = dist > distance * max_elongation_ratio;
             const sf::Vector2f n = v / dist;
             const float c = distance - dist;
-            const sf::Vector2f p = -(c * strength * 0.001f) / (p_1.mass + p_2.mass) * n;
+            const sf::Vector2f p = -(c * strength * 0.01f) / (p_1.mass + p_2.mass) * n;
             // Apply position correction
             p_1.move(-p / p_1.mass);
             p_2.move( p / p_2.mass);

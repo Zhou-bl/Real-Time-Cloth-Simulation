@@ -91,11 +91,12 @@ struct PhysicSolver
         return particle_id;
     }
 
-    void addLink(civ::ID particle_1, civ::ID particle_2, float max_elongation_ratio = 1.5f)
+    void addLink(civ::ID particle_1, civ::ID particle_2, float max_elongation_ratio = 1.5f, float strength = 1.0f)
     {
         const civ::ID link_id = constraints.emplace_back(objects.getRef(particle_1), objects.getRef(particle_2));
         constraints[link_id].id = link_id;
         constraints[link_id].max_elongation_ratio = max_elongation_ratio;
+        constraints[link_id].strength = strength;
     }
 
     void map(const std::function<void(Particle&)>& callback)

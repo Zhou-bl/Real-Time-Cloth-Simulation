@@ -4,7 +4,7 @@
 #include "wind.hpp"
 #include "utils.hpp"
 
-const bool TRIANGULAR=1;
+const bool TRIANGULAR=0;
 
 
 int main()
@@ -15,7 +15,7 @@ int main()
     // Initialize solver and renderer
     PhysicSolver solver;
     Renderer renderer(solver);
-    
+
     if( TRIANGULAR){
         // 三角化
     const uint32_t cloth_width  = 75;
@@ -52,9 +52,8 @@ int main()
             }
         }
     }
-    }
-    else {
-        // 正方形化
+    } else {
+    // 正方形化
     const uint32_t cloth_width  = 75;
     const uint32_t cloth_height = 50;
     const float    links_length = 20.0f;
@@ -75,11 +74,31 @@ int main()
             if (y > 0) {
                 solver.addLink(id-cloth_width, id, max_elongation);
             } else {
-                 // If not, pin the particle
+                // If not, pin the particle
                 solver.objects[id].moving = false;
             }
+
+                // 扭曲性弹簧
+                // Add top-left link if there is a particle on the top-left
+                if (x > 0 && y > 0) {
+                    solver.addLink(id-cloth_width-1, id, max_elongation, 0.3f);
+                }
+                // Add top-right link if there is a particle on the top-right
+                if (x < cloth_width - 1 && y > 0) {
+                    solver.addLink(id-cloth_width+1, id, max_elongation, 0.3f);
+                }
+
+                // 拉伸性弹簧
+                // Add top-top link if there is a particle on the top-top
+                if (y > 1) {
+                    solver.addLink(id-2*cloth_width, id, max_elongation, 0.1f);
+                }
+                // Add left-left link if there is a particle on the left-left
+                if (x > 1) {
+                    solver.addLink(id-2, id, max_elongation, 0.1f);
+                }
+            }
         }
-    }
     }
 
 
